@@ -1,24 +1,30 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import Login from './Login'
 import useLocalStorage from './custom_hooks/useLocalStorage'
 import Dashboard from './Dashboard';
 import { ContactsProvider } from './Context/useContacts'
 import { ConversationProvider } from './Context/useConversations'
+import { SocketProvider, useSocket} from './Context/useSockets'
+import uuid from 'react-uuid'
 function App() {
-  const [userName, setUserName] = useLocalStorage('id')
+  //const [userId, setUserId] = useLocalStorage('id')
+
+  const [userId, setUserId] = useState(uuid())
 
   const dashboard = () => {
     return (
-      <ContactsProvider>
-        <ConversationProvider>
-          <Dashboard userName={userName}/>
-        </ConversationProvider>
-      </ContactsProvider>
+      <SocketProvider userId={userId}>
+        <ContactsProvider>
+          <ConversationProvider userId={userId}>
+            <Dashboard userId={userId}/>
+          </ConversationProvider>
+        </ContactsProvider>
+      </SocketProvider>
     )
   }
 
   return (
-    userName ? dashboard() : <Login onSubmitUserName={setUserName}/>
+    userId ? dashboard() : <Login onSubmitUserName={setUserId}/>
   );
 }
 

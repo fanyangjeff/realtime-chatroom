@@ -1,9 +1,9 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {ListGroup} from 'react-bootstrap'
 import {useContacts} from './Context/useContacts'
 const Contacts = () => {
-
     const {contacts} = useContacts()
+
     return (
         <div>
             <ListGroup>

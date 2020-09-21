@@ -1,13 +1,17 @@
-import React, { useState, useRef} from 'react'
+import React, { useState, useRef, useEffect} from 'react'
 import {Modal, Button, Form} from 'react-bootstrap'
 import {useContacts} from './Context/useContacts'
 import {useConversations} from './Context/useConversations'
-const NewConversationModal = ({showModal, setShowModal}) => {
+import {useSocket} from './Context/useSockets'
+import uuid from 'react-uuid'
+const NewConversationModal = ({showModal, setShowModal, userId}) => {
 
     const {contacts} = useContacts()
     const {createConversation} = useConversations()
     const [selectedContacts, setSelectedContacts] = useState([])
+    const [groupId, setGroupId] = useState(uuid())
     const groupNameRef = useRef()
+    const socket = useSocket()
 
     const handleClose = () => {
         setShowModal(false)
@@ -26,19 +30,31 @@ const NewConversationModal = ({showModal, setShowModal}) => {
         }
     }
 
+
+    useEffect(() => {
+        //console.log(groupId)
+    }, [groupId])
+
     const handleSubmit = () => {
         if (selectedContacts.length == 0 || groupNameRef.current.value == ""){
             handleClose()
         }
+
+        if (socket) {
+            //console.log([...selectedContacts, userId])
+            socket.emit('createChat', {members: [...selectedContacts, userId], groupName: groupNameRef.current.value, groupId})
+        }
+
         handleClose()
-        createConversation(selectedContacts, groupNameRef.current.value)
+
+        createConversation(selectedContacts, groupNameRef.current.value, groupId)
+
+        //for future use
+        setGroupId(uuid())
     }
 
-    /*
-    useEffect(() => {
-        console.log(selectedContacts)
-    }, [selectedContacts])
-    */
+    
+    
 
     return (
         <Modal show={showModal}>

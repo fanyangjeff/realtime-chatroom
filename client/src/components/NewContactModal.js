@@ -1,21 +1,36 @@
-import React , {useRef} from 'react'
+import React , {useRef, useEffect} from 'react'
 import { Modal, Button, Form} from 'react-bootstrap'
 import {useContacts} from './Context/useContacts'
+import  {useSocket} from './Context/useSockets'
 const NewContactModal = ({showModal, setShowModal}) => {
 
     const emailRef = useRef()
     const nameRef = useRef()
-
+    const socket = useSocket()
     const {createContact} = useContacts()
 
     const handleClose = () => {
       setShowModal(false)
     }
 
+    useEffect(() => {
+      if (!socket) return
+
+      socket.on('requestFeedback', ({succeed}) => {
+        if (!succeed) {
+          console.log('friend does not exist')
+          
+        } else {
+          createContact(emailRef.current.value, nameRef.current.value)
+        }
+        handleClose()
+      })
+      return () => socket.off('requestFeedback')
+    }, [socket])
+
     const addContact = () => {
       if (emailRef.current.value == '') return
-      createContact(emailRef.current.value, nameRef.current.value)
-      handleClose()
+      socket.emit("sendRequest", emailRef.current.value)
     }
   
     return (
